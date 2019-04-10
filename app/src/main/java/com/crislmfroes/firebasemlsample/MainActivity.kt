@@ -107,8 +107,8 @@ class MainActivity : AppCompatActivity() {
         val lines = assets.open(path).reader().readLines()
         val mapLabels = hashMapOf<String, Float>()
         for (line in lines) {
-            mapLabels[line.trim()] = 0.0f
-            labels.add(line.trim())
+            mapLabels[line.trim().split(",")[0]] = 0.0f
+            labels.add(line.trim().split(",")[0])
         }
         return mapLabels
     }
@@ -154,10 +154,14 @@ class MainActivity : AppCompatActivity() {
         linearLayout!!.removeAllViews()
         for (i in 0..3) {
             val pair = sortedLabels[i]
-            val text = "%s:%f".format(pair.first, pair.second)
+            val text = "%s: %d%%".format(pair.first, (pair.second * 100).toInt())
             val textView = TextView(this.applicationContext)
             textView.text = text
+            textView.height = linearLayout!!.height / 3
             linearLayout!!.addView(textView)
+            if (i == 0) {
+                camera!!.contentDescription = text
+            }
         }
     }
 
