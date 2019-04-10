@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private var fotoapparat : Fotoapparat? = null
 
     private var mapPredictions : HashMap<String, Float>? = null
+    private val labels = mutableListOf<String>()
 
     private var manager : FirebaseModelManager? = null
     private var interpreter : FirebaseModelInterpreter? = null
@@ -69,21 +70,12 @@ class MainActivity : AppCompatActivity() {
     private fun processFrame(frame : Frame) {
         if (canProcess) {
             canProcess = false
-            //Log.d("OI", "OK!")
             val image = YuvImage(frame.image, ImageFormat.NV21, frame.size.width, frame.size.height, null)
             val out = ByteArrayOutputStream()
             image.compressToJpeg(Rect(0, 0, image.width, image.height), 50, out)
             val imageBytes = out.toByteArray()
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-            //bitmap.reconfigure(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-            //Log.d("TAG", bitmap.width.toString())
             val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
-            /*val intValues = IntArray(224 * 224)
-            val imgData = ByteBuffer.allocateDirect(1*224*224*3)
-            imgData.order(ByteOrder.nativeOrder())
-            imgData.rewind()
-            scaledBitmap.getPixels(intValues, 0, scaledBitmap.width, 0, 0, scaledBitmap.width, scaledBitmap.height)
-            var pixel = 0*/
             val input = Array(1) {Array(224) {Array(224) {ByteArray(3)}}}
             for (x in 0..223) {
                 for (y in 0..223) {
@@ -92,15 +84,8 @@ class MainActivity : AppCompatActivity() {
                     input[0][x][y][0] = (pixel shr 16 and 0xff).toByte()
                     input[0][x][y][1] = (pixel shr 8 and 0xff).toByte()
                     input[0][x][y][2] = (pixel and 0xff).toByte()
-                    //Log.d("QUALQUER COISA!", (input[0][x][y][0]).toString())
-                    /*val value = intValues[pixel++]
-                    imgData.put(((value shr 16) and 0xff).toByte())
-                    imgData.put(((value shr 8) and 0xff).toByte())
-                    imgData.put(((value) and 0xff).toByte())*/
                 }
             }
-            //displayDebug(input[0][0][0][0].toString())
-            //displayDebug("Funciona!!")
             val inputs = FirebaseModelInputs.Builder()
                 .add(input)
                 .build()
@@ -118,20 +103,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayDebug(text : String) {
-        linearLayout!!.removeAllViews()
-        val textView = TextView(this.applicationContext)
-        textView.text = text
-        linearLayout!!.addView(textView)
-    }
-
     private fun loadLabels(path : String) : HashMap<String, Float> {
         val lines = assets.open(path).reader().readLines()
-        val labels = hashMapOf<String, Float>()
+        val mapLabels = hashMapOf<String, Float>()
         for (line in lines) {
-            labels[line.trim()] = 0.0f
+            mapLabels[line.trim()] = 0.0f
+            labels.add(line.trim())
         }
-        return labels
+        return mapLabels
     }
 
     private fun initFirebaseML() {
@@ -167,12 +146,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun processPredictions(predictions : ByteArray) {
         for (i in 0 until predictions.size - 1) {
-            mapPredictions!![mapPredictions!!.keys.toList()[i]] = predBytesToFloat(predictions[i])
+            mapPredictions!![labels[i]] = predBytesToFloat(predictions[i])
         }
         val sortedLabels = mapPredictions!!.toList().sortedByDescending {
             it.second
         }
-        //Log.d("ALL PREDICTIONS", (predBytesToFloat(predictions.max()!!).toString()))
         linearLayout!!.removeAllViews()
         for (i in 0..3) {
             val pair = sortedLabels[i]
@@ -184,8 +162,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun predBytesToFloat(prediction : Byte) : Float {
-        //return (prediction and 0xff.toByte()) / 255.0f
-        //return (prediction.toFloat() / 127.0f)
         return (prediction.toInt() and 0xff) / 255.0f
     }
 
