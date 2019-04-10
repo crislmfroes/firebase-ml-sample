@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity() {
             for (x in 0..223) {
                 for (y in 0..223) {
                     val pixel = scaledBitmap.getPixel(x, y)
-                    Log.d("ei", (pixel shr 16 and 0xff).toString())
                     input[0][x][y][0] = (pixel shr 16 and 0xff).toByte()
                     input[0][x][y][1] = (pixel shr 8 and 0xff).toByte()
                     input[0][x][y][2] = (pixel and 0xff).toByte()
