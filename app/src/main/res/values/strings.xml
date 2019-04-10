@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Firebase ML Sample</string>
+    <string name="label_text">%s: %f</string>
+</resources>
