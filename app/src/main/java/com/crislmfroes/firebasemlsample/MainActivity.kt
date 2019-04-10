@@ -13,16 +13,9 @@ import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditio
 import com.google.firebase.ml.common.modeldownload.FirebaseModelManager
 import com.google.firebase.ml.custom.*
 import io.fotoapparat.Fotoapparat
-import io.fotoapparat.characteristic.LensPosition
-import io.fotoapparat.log.logcat
-import io.fotoapparat.parameter.ScaleType
 import io.fotoapparat.preview.Frame
-import io.fotoapparat.selector.*
 import io.fotoapparat.view.CameraView
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import kotlin.experimental.and
 
 class MainActivity : AppCompatActivity() {
 
